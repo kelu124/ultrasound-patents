@@ -3,24 +3,23 @@ import sys
 from urllib2 import urlopen
 import bs4 as BeautifulSoup
 import urllib2
-# Requis pour MySQL connection
-# Requis pour MySQL connection
 import MySQLdb
+from tecpass import * 
 
 
 # USAGE
 # python patent.py US3541840 US3714817 US3864660
+#
 
 
-db=MySQLdb.connect(##)
 cursor=db.cursor()
 
 add_patent = ("INSERT INTO patents "
-               "(pTitre, pLongID, pShortID, pAppDate, pInventors, pAbstract, pBackWard, pForWard) "
-               "VALUES (%s, %s, %s, %s, %s,  %s, %s, %s)")
+               "(pTitre, pLongID, pShortID, pAppDate, pInventors, pAbstract, pBackWard, pForWard, pGeo) "
+               "VALUES (%s, %s, %s, %s, %s,  %s, %s, %s, %s)")
 
 
-RootURL = 'http://www.google.fr/patents/'
+RootURL = 'http://www.google.com/patents/'
 
 t = sys.argv
 del t[0]
@@ -33,7 +32,9 @@ for patentID in t:
 	numrows = cursor.execute(query, patentID)
 
 	if not(numrows):
+		print "Brevet pas trouve!"
 		pURL = RootURL + patentID
+		print pURL
 		req = urllib2.Request(pURL, headers={'User-Agent' : "foobar"})
 		response = urllib2.urlopen(req)
 		html = response.read()
@@ -46,12 +47,31 @@ for patentID in t:
 		PatentLongID = soup.find_all("td", class_="single-patent-bibdata")[0].get_text()
 		PatentShortID = patentID
 		PatentAppDate = soup.find_all("td", class_="single-patent-bibdata")[3].get_text()
-		Inventors = soup.find_all("tr", class_="patent-bibdata-list-row")[2].find_all("span", class_="patent-bibdata-value")
+
+		Geos = soup.find_all("tr", class_="patent-bibdata-list-row")
+		Geos = Geos[1].find_all("span", class_="patent-bibdata-value")
+		
+		GeoList = []
+
+		for child in Geos:
+			if len(child.find_all("a")):
+				GeoList.append(str(child.find_all("a")[0].get_text()))
+			    #print(child.find_all("a")[0].get_text())
+		GeoList = filter(None, GeoList)
+		GeoList = ', '.join(GeoList)
+		print GeoList
+
+		Inventors = soup.find_all("tr", class_="patent-bibdata-list-row")
+		Inventors = Inventors[2].find_all("span", class_="patent-bibdata-value")
 		InventorList = []
+
 		for child in Inventors:
 		    InventorList.append(str(child.find_all("a")[0].get_text()))
 		    #print(child.find_all("a")[0].get_text())
+		InventorList = filter(None, InventorList)
 		InventorList = ', '.join(InventorList)
+		
+
 		PatentAbstractTest = soup.find_all("div", class_="abstract")
 		PatentDesc = soup.find_all("div", class_="patent-description-section")
 
@@ -80,8 +100,8 @@ for patentID in t:
 		ForWardList = filter(None, ForWardList)
 		BackWardList = ', '.join(BackWardList)
 		ForWardList = ', '.join(ForWardList)
-
-		data_patent = (PatentTitle, PatentLongID, PatentShortID, PatentAppDate, InventorList, PatentAbstract, BackWardList, ForWardList)
+		#encodage en UTF8.. on ne sait jamais
+		data_patent = (PatentTitle.encode( "utf-8" ), PatentLongID.encode( "utf-8" ), PatentShortID.encode( "utf-8" ), PatentAppDate.encode( "utf-8" ), InventorList.encode( "utf-8" ), PatentAbstract.encode( "utf-8" ), BackWardList.encode( "utf-8" ), ForWardList.encode( "utf-8" ), GeoList.encode( "utf-8" ))
 		cursor.execute(add_patent, data_patent)
 
 

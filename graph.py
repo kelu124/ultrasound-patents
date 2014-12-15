@@ -6,11 +6,11 @@ import urllib2
 # Requis pour MySQL connection
 # Requis pour MySQL connection
 import MySQLdb
+from tecpass import * 
 
 # USAGE 
 # python graph.py > ./Bureau/graph.gdf
 
-db=MySQLdb.connect(##)
 cursor=db.cursor()
 
 
@@ -27,7 +27,7 @@ for row in result:
 	Forward = row[2]
 	Forward = Forward.split(', ')
 	Titre = row[3]
-	print "%s, '%s', '114,116,177'" % (Current, Titre)
+	print "%s, %s, '114,116,177'" % (Current, Titre)
 
 print 'edgedef>node1 VARCHAR,node2 VARCHAR,directed BOOLEAN'
 for row in result:
@@ -36,12 +36,12 @@ for row in result:
 	BackWard = BackWard.split(', ')
 	if len(BackWard)>1:
 		for item in BackWard:
-			print "%s, %s, true" % (item, Current)
+			print "%s, %s, true" % (Current, item)
 	Forward = row[2]
 	Forward = Forward.split(', ')
 	if len(Forward)>1:
 		for item in Forward:
-			print "%s, %s, true" % (Current, item)
+			print "%s, %s, true" % (item, Current)
 	Titre = row[3]
 	#print '%s, %s' % (Current, Titre)
 
