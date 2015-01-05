@@ -5,5 +5,6 @@ Des outils pour de l'analyse de données - en particulier des brevets portants s
 
 # display_patent.php est un petit script pour verifier ce qu'on a dans la DB.
 
+# graph.py cree le graphe GDF des brevets (liens forward et backward)
 
 Avec un dump des données en JSON au cas où!
