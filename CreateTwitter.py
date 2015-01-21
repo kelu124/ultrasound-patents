@@ -51,6 +51,8 @@ while (mCurrent <= mNow):
 	for tw33t in result:
 		tWho = str(tw33t[2])
 		tWhat = str(tw33t[3])
+		tWhat = string.replace(tWhat, 'RT ', 'RT @') 
+		tWhat = string.replace(tWhat, '@@', '@')
 		tDate = str(tw33t[4])
 		OutPut += "* '''"+tWho+"''' ''"+tWhat+"'' ("+tDate+")\n"
 	
