@@ -46,7 +46,7 @@ def apply_styles(graph, styles):
 
 graph = functools.partial(gv.Graph, format='svg')
 digraph = functools.partial(gv.Digraph, format='svg')
-PatentsGraph = strict digraph()
+PatentsGraph =  digraph()
 
 def Svg2Png(svgfile):
 	output_filename = svgfile+'.png'
