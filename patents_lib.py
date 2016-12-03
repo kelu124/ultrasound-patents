@@ -51,7 +51,6 @@ def get_soup(id_patent,mydb):
 		opener.addheaders = [('User-agent', 'Mozilla/5.0')]
 		opener.addheader = [('Accept-Encoding', 'utf-8')]
 		pURL = "http://www.google.com/patents/"+id_patent
-		print pURL
 		try:
 			r =  opener.open(pURL).read()
 		except urllib2.HTTPError:
@@ -119,9 +118,7 @@ def get_soup(id_patent,mydb):
 		BackWardList = filter(None, BackWardList)
 		ForWardList = filter(None, ForWardList)
 		BackWardList = ', '.join(BackWardList)
-		print "> "+BackWardList
 		ForWardList = ', '.join(ForWardList)
-		print "> "+ForWardList
 		#encodage en UTF8.. on ne sait jamais
 
 		FullObject.append(PatentShortID)
@@ -148,6 +145,9 @@ def get_soup(id_patent,mydb):
 		print "Already found"
 
 	conn.close()
-	time.sleep(2)
+	#time.sleep(2)
 
 	return [Found,BackWardList,ForWardList]
+
+
+
