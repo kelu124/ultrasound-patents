@@ -26,7 +26,7 @@ import os.path
 
 def GetPatent(id_patent):
     
-    output_directory = "./data/"
+    output_directory = "./.cache/"
     if os.path.isfile(output_directory+id_patent):
         print "Already here"
     else:
@@ -60,11 +60,13 @@ def get_soup(id_patent,mydb):
     ForWardList = []
     BackWardList = []
     Found = 0
-    
-    if not(numrows):
-        print "-> Patent not found"
 
-        pURL = "./data/"+id_patent
+    GetPatent(id_patent)
+
+    if not(numrows):
+        #print "-> Patent not found"
+
+        pURL = "./.cache/"+id_patent
         file_object  = open(pURL, "r") 
         r =  file_object.read()
 
@@ -75,14 +77,14 @@ def get_soup(id_patent,mydb):
 
         #PatentTitle = soup.find_all("span", class_="patent-title")[0].get_text()
         PatentTitle = soup.find_all("h1")[0].get_text().strip()
-        print "PatentTitle "+PatentTitle
+        print "Processing "+PatentTitle+ " ("+id_patent.strip()+")"
         
         PatentAppDate = soup(itemprop="priorityDate")[0].get_text().strip()
-        print "PatentAppDate "+PatentAppDate
+        #print "PatentAppDate "+PatentAppDate
         
         #PatentLongID = soup.find_all("td", class_="single-patent-bibdata")[0].get_text()
         PatentLongID = id_patent.strip()
-        print "PatentLongID "+PatentLongID
+        #print "PatentLongID "+PatentLongID
         PatentShortID = id_patent.strip()
         
         
@@ -90,15 +92,14 @@ def get_soup(id_patent,mydb):
         #print BackWardC
         BackwardList = []
         if len(BackWardC) :
-            print "There are backwards"
+            #print "There are backwards"
             for child in BackWardC:
                 #BackWardList.append(str(child.get_text()))
                 #print child 
                 BWPatent = child.find(itemprop="publicationNumber").get_text().strip()
-                print BWPatent
+                #print BWPatent
                 BackwardList.append(BWPatent)
-        else:
-            print "No backwards"
+
         #print BackwardList
         
         
@@ -107,15 +108,13 @@ def get_soup(id_patent,mydb):
         #print BackWardC
         ForWardList = []
         if len(FordWardC) :
-            print "There are forwards"
+            #print "There are forwards"
             for child in FordWardC:
                 #BackWardList.append(str(child.get_text()))
                 #print child 
                 FWPatent = child.find(itemprop="publicationNumber").get_text().strip()
-                print FWPatent
+                #print FWPatent
                 ForWardList.append(FWPatent)
-        else:
-            print "No forwards"
 
         
 
@@ -156,8 +155,6 @@ def get_soup(id_patent,mydb):
          
         BackwardList = filter(None, BackwardList)
         ForWardList = filter(None, ForWardList)
-        print BackwardList
-        print ForWardList
         BackWardList = ', '.join(BackwardList)
         ForWardList = ', '.join(ForWardList)
         #encodage en UTF8.. on ne sait jamais
@@ -218,6 +215,27 @@ def get_top(mydb):
 
     return counts.most_common(10)
 
+def get_top_back(mydb):
+	# Getting only the ones with the most backwards compatibility
+    conn = sqlite3.connect(mydb)
+    cursor = conn.cursor()
+    Request =  'SELECT p_id, p_backward, p_forward FROM patents'
+    #print Request
+    cursor.execute(Request)
+    Top = []
+    DB = []
+    for row in cursor:
+        DB.append(row[0])
+        if len(row[1].split(", ")):
+            Top += row[1].split(", ")
+    Top = filter(None, Top) 
+    # We remove the ones already existing
+    TopClean = [x for x in Top if x not in DB]
+    counts = Counter(TopClean)
+    conn.close()
+
+    return counts.most_common(10)
+
 def GetTopPat(MaDB):
     Top3 = get_top(MaDB)
     for k in Top3:
@@ -231,22 +249,49 @@ def GetTopPat(MaDB):
 
 def get_images(id_patent):
 
-    pURL = "./data/"+id_patent
+    pURL = "./.cache/"+id_patent
     file_object  = open(pURL, "r") 
     r =  file_object.read()
 
     soup = BeautifulSoup(r,"lxml")
     ImgsBig = soup(itemprop="full")
     for img in ImgsBig:
-        print img["content"]
+        #print img["content"]
         fn = img["content"].split("/")[-1].strip()
-        output_directory = "./data/images/"
-        if os.path.isfile(output_directory+fn):
-            print fn+" is already here"
-        else:
+        output_directory = "./.cache/images/"
+        if not os.path.isfile(output_directory+fn):
             url = img["content"]
             filename = wget.download(url, out=output_directory)
         
     return 1
 
+def get_own_top(mydb):
 
+    conn = sqlite3.connect(mydb)
+    cursor = conn.cursor()
+    Request =  'SELECT p_id, p_backward, p_forward FROM patents'
+    #print Request
+    cursor.execute(Request)
+    Top = []
+    DB = []
+    for row in cursor:
+        DB.append(row[0])
+        if len(row[1].split(", ")):
+            Top += row[1].split(", ")
+        if len(row[2].split(", ")):
+            Top +=  row[2].split(", ")
+    #print numrows
+    #print len(Top)
+    Top = filter(None, Top) 
+    TopClean = [x for x in Top if x in DB]
+    print len(TopClean)
+    counts = Counter(TopClean)
+    #print(counts)
+
+    #print DB
+    conn.close()
+    result = []
+    for k in counts.most_common(10):
+        result.append(str(k[0]))
+    
+    return result

@@ -68,13 +68,13 @@ def Svg2Png(svgfile):
 def getGraph(mydb):
 	conn = sqlite3.connect(mydb)
 	cursor = conn.cursor()
-	SQLrequest = 	"""SELECT p_id , p_title , p_backward , p_forward  FROM patents ORDER BY RANDOM() LIMIT 5"""
+	SQLrequest = 	"""SELECT p_id , p_title , p_backward , p_forward  FROM patents ORDER BY RANDOM()"""
 	cursor.execute(SQLrequest)
 	numrows = cursor.fetchall()
 
-	print numrows
+	#print numrows
 	for item in numrows:
-		print item
+		#print item
 
 		PatentsGraph.node(item[0], style="rounded,filled", fillcolor="yellow")
 		BackW = item[2].split(", ")
@@ -93,3 +93,36 @@ def getGraph(mydb):
 	PatentsGraph.render("graph.data")
 	Svg2Png("graph.data")
 
+def getSelectedGraph(mydb,result):
+    
+    conn = sqlite3.connect(mydb)
+    cursor = conn.cursor()
+    for id_patent in result:
+        #print "==> "+id_patent
+        #SQLrequest  = 'SELECT p_id, p_title, p_backward, p_forward '
+        #SQLrequest += 'WHERE p_id LIKE "'
+        #SQLrequest += id_patent+'"'
+        SQLrequest = 'SELECT p_id, p_title, p_backward, p_forward FROM patents WHERE p_id LIKE "'+id_patent+'"'
+        #print SQLrequest
+        cursor.execute(SQLrequest)
+        numrows = cursor.fetchall()
+
+        #print numrows
+        for item in numrows:
+            #print item
+
+            PatentsGraph.node(item[0], style="rounded,filled", fillcolor="yellow")
+            BackW = item[2].split(", ")
+            ForW = item[3].split(", ")
+
+            for BackItem in BackW:
+                PatentsGraph.node(BackItem,border="0")	
+                PatentsGraph.edge(BackItem,item[0])
+
+            for ForwardItem in ForW:
+                PatentsGraph.node(ForwardItem,border="0")
+                PatentsGraph.edge(item[0],ForwardItem)
+
+    apply_styles(PatentsGraph, styles)
+    PatentsGraph.render("core.graph.data")
+    Svg2Png("core.graph.data")
