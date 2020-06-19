@@ -11,13 +11,13 @@ import functools
 from wand.api import library
 import wand.color
 import wand.image
-import Image
+from PIL import Image
 import sqlite3
 import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 from bs4 import BeautifulSoup
-import urllib2
+#import urllib2
 
  
 
@@ -49,19 +49,19 @@ digraph = functools.partial(gv.Digraph, format='svg')
 PatentsGraph =  digraph()
 
 def Svg2Png(svgfile):
-	output_filename = svgfile+'.png'
-	input_filename = svgfile+'.svg'
+    output_filename = svgfile+'.png'
+    input_filename = svgfile+'.svg'
 
-	svg_file = open(input_filename,"r")
+    svg_file = open(input_filename,"r")
 
-	with wand.image.Image() as image:
-	    with wand.color.Color('transparent') as background_color:
-		library.MagickSetBackgroundColor(image.wand, background_color.resource) 
-	    image.read(blob=svg_file.read())
-	    png_image = image.make_blob("png32")
+    with wand.image.Image() as image:
+        with wand.color.Color('transparent') as background_color:
+            library.MagickSetBackgroundColor(image.wand, background_color.resource)
+            image.read(blob=svg_file.read())
+            png_image = image.make_blob("png32")
 
-	with open(output_filename, "wb") as out:
-	    out.write(png_image)
+    with open(output_filename, "wb") as out:
+        out.write(png_image)
 
 
 

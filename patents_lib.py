@@ -7,15 +7,15 @@ import json
 
 import hashlib
 import sqlite3
-import urllib2
+#import urllib2
 import time
 import pickle as cPickle
 import re
 from collections import Counter
 
 import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 
 
 import wget
@@ -28,7 +28,7 @@ def GetPatent(id_patent):
     
     output_directory = "./.cache/"
     if os.path.isfile(output_directory+id_patent):
-        print "Already here"
+        print(id_patent,"Already here")
     else:
         url = "http://patents.google.com/patent/"+id_patent
         filename = wget.download(url, out=output_directory)
@@ -44,7 +44,23 @@ def check_or_create_all_tables(mydb):
         p_link text, p_inventor text, p_beneficiary,
         p_abstract text, p_backward text, p_forward text) 
         """)
+    
+def regenerate_cache(mydb):
+    conn = sqlite3.connect(mydb)
+    cursor = conn.cursor()
+    Request =  'SELECT p_id FROM patents'
+    #print Request
+    cursor.execute(Request)
 
+    for row in cursor:
+        print("Getting the patent "+row[0])
+        GetPatent(row[0])
+    return 1
+
+
+        
+        
+        
 
 def get_soup(id_patent,mydb):
 
@@ -77,7 +93,7 @@ def get_soup(id_patent,mydb):
 
         #PatentTitle = soup.find_all("span", class_="patent-title")[0].get_text()
         PatentTitle = soup.find_all("h1")[0].get_text().strip()
-        print "Processing "+PatentTitle+ " ("+id_patent.strip()+")"
+        print("Processing "+PatentTitle+ " ("+id_patent.strip()+")")
         
         PatentAppDate = soup(itemprop="priorityDate")[0].get_text().strip()
         #print "PatentAppDate "+PatentAppDate
@@ -179,7 +195,7 @@ def get_soup(id_patent,mydb):
 
     else:
         Found = 1
-        print " -> Patent found"
+        print(" -> Patent found")
 
         conn.close()
         #time.sleep(2)
@@ -206,7 +222,7 @@ def get_top(mydb):
     #print len(Top)
     Top = filter(None, Top) 
     TopClean = [x for x in Top if x not in DB]
-    print len(TopClean)
+    print("Len:TopClean: ",len(TopClean) )
     counts = Counter(TopClean)
     #print(counts)
 
@@ -234,7 +250,7 @@ def get_top_back(mydb):
     counts = Counter(TopClean)
     conn.close()
 
-    return counts.most_common(10)
+    return counts.most_common(10),DB
 
 def GetTopPat(MaDB):
     Top3 = get_top(MaDB)
@@ -284,7 +300,7 @@ def get_own_top(mydb):
     #print len(Top)
     Top = filter(None, Top) 
     TopClean = [x for x in Top if x in DB]
-    print len(TopClean)
+    print(len(TopClean))
     counts = Counter(TopClean)
     #print(counts)
 

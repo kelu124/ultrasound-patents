@@ -1,5 +1,10 @@
 # Use
 
+## Content
+
+* [NLTK-Patents.ipynb](/NLTK-Patents.ipynb): to parse the patents with NLTK.
+* [2020: Pandas!](/20180318-Pandas.ipynb): getting the database and parsing it into a df. [Compressed](/AllPatentsStructure.csv.gz).
+
 ## Parsing the different patents
 
 Using:
